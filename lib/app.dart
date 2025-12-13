@@ -4,6 +4,7 @@ import 'package:printmax_app/features/auth/auth_provider.dart';
 import 'package:printmax_app/features/auth/login_screen.dart';
 import 'package:printmax_app/features/dashboard/dashboard_provider.dart';
 import 'package:printmax_app/features/dashboard/dashboard_screen.dart';
+import 'package:printmax_app/core/update_enforcer.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -39,12 +40,26 @@ class App extends StatelessWidget {
   }
 }
 
-class _RootGate extends StatelessWidget {
+class _RootGate extends StatefulWidget {
   const _RootGate({required this.auth});
   final AuthProvider auth;
 
   @override
+  State<_RootGate> createState() => _RootGateState();
+}
+
+class _RootGateState extends State<_RootGate> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await UpdateEnforcer.instance.checkOnAppStart(context);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final auth = widget.auth;
     if (auth.initializing) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
